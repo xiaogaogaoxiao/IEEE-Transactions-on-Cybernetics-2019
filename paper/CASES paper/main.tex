@@ -1,0 +1,120 @@
+\documentclass[sigconf]{acmart}
+
+\include{preamble}
+\include{preamble-listingsconf}
+\include{macros}
+
+%\DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
+
+\newenvironment{abbreviations}{
+	\@restonecolfalse
+	\chapter*{List of \abbreviationsname}
+	\@mkboth{\abbreviationsname}
+	{\abbreviationsname}
+}
+{\newpage\@mkboth{}{}}
+\newcommand\abbreviationsname{Abbreviations}
+
+
+\begin{filecontents*}{avdta.tikz}
+	\input{Content/fig/av-dta.tex}
+\end{filecontents*}
+\begin{filecontents*}{avgraph.tikz}
+	\input{Content/fig/av-graph.tex}
+\end{filecontents*}
+\begin{filecontents*}{avgraphacc.tikz}
+	\input{Content/fig/av-graph-acc.tex}
+\end{filecontents*}
+\begin{filecontents*}{avpedrtesmall.tikz}
+	\input{Content/fig/av-ped-rte-small.tex}
+\end{filecontents*}
+
+\copyrightyear{2019}
+\acmYear{2019}
+\setcopyright{acmlicensed}
+\acmConference[]{ACM CASES}{October 2019}{New York, NY, USA}
+%\acmPrice{15.00}
+%\acmDOI{10.1145/1122445.1122456}
+%\acmISBN{978-1-4503-9999-9/18/06}
+
+\begin{document}
+
+\title{Enhancing the safety of neural networks using runtime enforcement}
+
+\ignore{
+\author{Keyan Monadjem}
+\affiliation{%
+	\institution{University of Auckland}
+	\city{Auckland, New Zealand} 
+}
+\email{kmon173@aucklanduni.ac.nz}
+
+\author{Hammond Pearce}
+\affiliation{%
+	\institution{University of Auckland}
+	\city{Auckland, New Zealand} 
+}
+\email{hammond.pearce@auckland.ac.nz}
+
+\author{Srinivas Pinisetty}
+\affiliation{%
+	\institution{ Indian Institute of Technology Bhubaneswar}
+	\city{Bhubaneswar, India} 
+}
+\email{spinisetty@iitbbs.ac.in}
+
+\author{Partha S. Roop}
+\affiliation{%
+	\institution{University of Auckland}
+	\city{Auckland, New Zealand} 
+}
+\email{p.roop@auckland.ac.nz}
+}
+\begin{abstract}
+Neural networks are increasingly used in Cyber-Physical Systems (CPS),
+where safety is paramount. Considering this, there are many recent
+efforts on combining formal methods with neural networks. However,
+none of the developed formal techniques are capable of verifying
+timing requirements, which is essential for safe operation of CPS.
+
+In this paper we make two novel contributions towards the design of a
+new class of neural networks for safety called \acp{ENN}. First,
+we provide a synchronous execution semantics of neural networks and
+extend them with an unique run-time enforcement
+framework to facilitate the mitigation of safety issues at
+run-time. Second, we propose an enforcement algorithm that can
+enforce policies that constrain neural networks by ensuring that all valued input and output remain policy
+compliant and the response time of the network also remains policy
+compliant. Thus, \acp{ENN} provide the first formal framework for
+creating real-time systems based on neural networks.
+Through two complex examples of safety-critical applications, we
+demonstrate that the developed approach enhances the safety and quality
+of the benchmarks. This paper paves the way towards the design of safer
+neural networks using run-time enforcement.
+\end{abstract}
+
+\maketitle
+
+\input{Content/acronyms}
+
+\input{Content/introduction}
+\input{Content/snn}
+\input{Content/re}
+%\input{Content/background}
+%\input{Content/vdta}
+%\input{Content/case}
+%\input{Content/definitions}
+\input{Content/benchmark-res}
+\input{Content/relatedwork}
+%\input{Content/discussion}
+\input{Content/conclusion}
+
+
+%\renewcommand{\bibname}{References}
+% \clearpage
+%\phantomsection
+%\addcontentsline{toc}{chapter}{\bibname}
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,28 @@
+
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=5.5 cm, scale = 1, transform shape]
+
+\tikzstyle{accept} = [draw=blue!75,fill=blue!20]
+\tikzstyle{violate} = [draw=red!75,fill=red!20]
+
+\node[initial,state, accepting, accept] (A) {$l_{drive}$};
+\node[state, violate]         (C) [right of=A]  {$l_v$};
+
+\path[->] 
+(A) edge [loop above]       node [above, xshift=-1em]  
+{
+	\scriptsize$\let\scriptstyle\textstyle\substack{(A~\&~S~<~2)}$
+} (A)
+
+(A) edge [right]	node [above]  
+{
+	\scriptsize$\let\scriptstyle\textstyle\substack{(A~\&~S~>=~2)}$
+} (C)
+
+(C) edge [loop above]		node [above]  
+{
+	\scriptsize$\sum$
+} (C)
+;
+
+\end{tikzpicture}

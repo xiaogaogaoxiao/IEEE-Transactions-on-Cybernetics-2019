@@ -1,0 +1,28 @@
+
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=5.5 cm, scale = 1, transform shape]
+
+\tikzstyle{accept} = [draw=blue!75,fill=blue!20]
+\tikzstyle{violate} = [draw=red!75,fill=red!20]
+
+\node[initial,state, accepting, accept] (A) {$l_{drive}$};
+\node[state, violate]         (C) [right of=A]  {$l_v$};
+
+\path[->] 
+		(A) edge [loop above]       node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\Big((B_H~\&~(O_2~=~C))~|\\~(B_S~\&~(O_5~=~C))~\&\\~(S~>~O_{2_S}~|~S~>~O_{5_S})~|\\~A~\&~(O_4~=~C)~\&~S~<~O_{4_S}~\&~\overline{(O_5~=~P)~|~(O_2~=~P)}\Big)}$
+		} (A)
+	
+		(A) edge [right]	node [below]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\sum\textbackslash \Big((B_H~\&~(O_2~=~C))~|\\~(B_S~\&~(O_5~=~C))~\&\\~(S~>~O_{2_S}~|~S~>~O_{5_S})~|\\~A~\&~(O_4~=~C)~\&~S~<~O_{4_S}~\&~\overline{(O_5~=~P)~|~(O_2~=~P)}\Big)}$
+		} (C)
+	
+		(C) edge [loop above]		node [above]  
+		{
+			\scriptsize$\sum$
+		} (C)
+		;
+
+\end{tikzpicture}

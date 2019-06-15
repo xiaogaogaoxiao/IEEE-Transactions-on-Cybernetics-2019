@@ -1,0 +1,209 @@
+
+\subsection{VDTA: Defining Safety Policies for \ac{CPS}}
+
+We consider our industrial \ac{CPS} systems to have finite ordered sets of valued input channels ${I} = \{{i_1}, {i_2}, \ldots {i_n}\}$ and valued output channels ${O} = \{{o_1}, {o_2}, \ldots {o_n}\}$.
+
+A VDTA can be seen as a DTA with a finite set of locations, a finite set of discrete clocks used to represent time evolution, and external input (resp. output channels) called ``external variables'' which are used for representing system data.
+They also have internal variables which are used for internal computation, compared to the external variables which model the data carried by the actions from the monitored system (resp. environment). 
+\ignore{
+In a VDTA, a transition consists of an action carrying values of external variables, a guard on internal variables, external variables and clocks, and an assignment of internal variables, and reset of clocks.
+%Thus, each input (resp. output channel) is considered as an external variable. 
+
+\begin{remark}[Actions in VDTA]
+In the framework that we consider, there is only a default ``tick'' action, which represents the ticking of a ``logical clock'' called ``tk''. 
+We thus simplify the model by omitting actions.
+Every transition consists of a default ``tick'' action. In every tick, the values of all input-output channels are updated.   
+\end{remark}
+}
+Within \ac{VDTA}, there is an implicit logical tick similar to synchronous programming languages~\cite{SynchronousLanguages12YearsLater}.
+All transitions occur relative to this tick.
+At the start of a tick, all input channels are sampled, and at the end of the tick, all output channels are emitted.
+Thus, a tick constitutes and atomic reaction of the reactive system.
+Before we look into the formal definition of VDTA, let us consider an example.
+
+\begin{figure}[tb]
+	\centering
+	\input{../fig/dta/prop_overcurrent_bidir_paper3b}
+	\caption{Complete overcurrent policy defined via \ac{VDTA} $\mathcal{A}_{oc}$}
+	\label{fig:vsa-overcurrent}
+	\vspace{-5mm}
+\end{figure}
+
+
+\begin{example}
+	\label{eg:vdta}
+	%we need values because of tau
+	%deadline is a function of the overcurrent value
+	The overcurrent relay case study can be presented as a \ac{VDTA} $\mathcal{A}_{oc}$, as depicted in Figure~\ref{fig:vsa-overcurrent}. 
+	This \ac{VDTA} formally specifies two properties.
+	Firstly, entering a set current value that is beyond a safe maximum is a violation.
+	Secondly, staying in an overcurrent state for too long without tripping the relay is a violation.
+	
+	The \ac{VDTA} for these rules has a set of locations $L = \{ l_{safe},l_{unsafe}, l_{vio}\}$, with accepting locations F = $\{l_{safe}\}$, and $l_{safe}$ as the initial state. 
+	It has the set of external variables  $C = \{i, i_{set}, r\}$, where $i$ and $i_{set}$ (representing the measured and set currents) are input channels of integer type, and $r$ (representing the relay command) is an output channel of Boolean type.  
+	Its set of internal variables $V = \{i_{max}\}$, where $i_{max}$ (representing the physical max current capacity of the system) is of integer type.
+	
+%	The \ac{VDTA} has a set of actions $\Sigma = \{tk(i, i_{set}, r)\}$.
+%	It consists of only a default ``tick'' action, which represents the ticking of a ``logical clock'' called ``tk''. 
+%	In every tick, the values of all input-output channels are updated.
+	
+	In a VDTA, a transition can have guards on internal variables, external variables and clocks. 
+	For example, when in location $l_{safe}$, the transition from $l_{safe}$ to $l_{unsafe}$ can happen only if $r$ is true, and $i \geq i_{set}$ and $i_{set} \leq i_{max}$. 
+	The clock values can be reset upon transitions. For example, upon transition from $l_{safe}$ to $l_{unsafe}$, the value of clock $x$ is reset to 0.
+	The transitions can also depend on computable functions.
+	For instance, $\tau$ is a function with $i$ and $i_{set}$ as input parameters, which returns a ``safe time'' value.
+	
+	It can be seen that there are three violation transitions, labelled \textcircled{a}, \textcircled{b}, and \textcircled{c}.
+	Transitions \textcircled{a} and \textcircled{b} occur when ${i_{set}}$ is greater than the safe physical value $i_{max}$, and represent the implementation of the first property.
+	Transition \textcircled{c} encodes the second property, that is the case where the overcurrent time exceeds the safe time without the circuit-breaker `trip' command being issued.
+\end{example}
+
+Let us now consider in more detail the syntax and semantics of VDTAs.
+%
+For a variable (resp. channel) $v$, ${\cal D}_v$ denotes its domain,
+and for a tuple of variables $V= (v_1, \ldots, v_n)$,
+${\cal D}_V$ is the product domain ${\cal D}_{v_1} \times \cdots \times {\cal D}_{v_n}$.
+%A predicate $P(V)$ on a tuple of variables $V$ is a logical formula whose semantics is a function ${\cal D}_V \rightarrow \{\true, \false\}$.
+A valuation of the variables in $V$
+is a mapping $\nu$ which maps every variable $v \in V$ to a value $\nu(v)$ in ${\cal D}_v$.
+%
+Let $X=\{x_1,\ldots, x_k\}$ be a finite set of integer variables representing discrete clocks.
+%
+A {\em valuation} for $x$ is an element of $\bbn$, that is a function from $x$ to $\bbn$.
+The set of valuations for the set of clocks $X$ is denoted by $\chi$.
+%
+For $\chi\in\bbn^X$, $\chi+1$ (which captures the ticking of the digital clock) is the valuation assigning $\chi(x)+1$ to each clock variable $x$ of $X$.
+Given a set of clock variables $X' \subseteq X$, $\chi[X' \leftarrow 0]$ is the valuation of clock variables $\chi$ where all the clock variables in $X'$ are assigned to $0$.
+
+
+
+%
+\begin{definition}[Syntax of {VDTA}s]
+	\label{def:ptav}
+	A {VDTA} is a tuple \\
+	$\calA = \left(L, {l_0}, X, V, C, \Theta, F,  \Delta \right)$ where:
+	\squishlist
+%	\item $\Sigma$ is a non-empty finite set of actions,
+%	and an action $a \in \Sigma$ has a signature $sig(a) = ( t_0, t_1, \ldots, t_k )$ which is a tuple of types of the external variables,
+	\item $L$ is a finite non-empty set of locations, with $l_0 \in L$ the initial location, and $F \subseteq L$ the set of accepting locations;
+	\item $X$ is a finite set of discrete clocks;
+	\item $V$ is a tuple of typed internal variables; 
+	\item $C$ is a tuple of external variables, where $C = I \cup O$, where $I$ is the set of input channels, and $O$ is the set of output channels; 
+	\item $\Theta\subseteq {\cal D}_{V }$ is an initial condition which is a computable predicate over $V$;
+	\item $\Delta$ is a finite set of transitions, and each transition $t \in \Delta$ is a tuple $( l, G, A, l' )$
+	also written\\
+	$l \xrightarrow{G(V,C), V':=A(V,C)} l'$
+	such that,
+	\squishlist
+	\item[\textbullet] $l, l' \in L$ are respectively the origin and target locations of the transition;
+	%\item[\textbullet] $c$ is a tuple of external variables;
+	\item[\textbullet] $G = G^D \wedge G^X$ is the guard where
+	\squishlist
+	\item[-] $G^D \subseteq {\cal D}_V \times {\cal D}_{C}$
+	is a computable predicate over internal variables and external variables  in $V \cup C$;
+	\item[-] $G^X$ is a clock constraint over $X$ defined as a Boolean combinations of constraints of the form $x \sharp f(V \cup C)$, where $x \in X$ and $f(V \cup C)$ is a computable function, and $\sharp \in \{ <, \leq, =, \geq, > \}$;
+	\squishend
+	\item[\textbullet] $A$$=$$(A^D, A^X)$ is the assignment of the transition where
+	\squishlist
+	\item[-] $A^D :{\cal D}_V \times {\cal D}_{C} \rightarrow {\cal D}_V$ defines the evolution of internal variables.
+	\item[-] $A^X \subseteq X$ is the set of clocks to be reset.
+	\squishend
+	\squishend
+	\squishend
+\end{definition}
+%
+
+A word is a sequence $\sigma = \eta_1\cdot \eta_2 \cdots \eta_n$ where $\forall i \in [1,n]:$ $\eta_i$ is a tuple of values of variables in $C = I \cup O$. 
+
+
+\ignore{
+\begin{example}
+	\label{eg:vdta}
+	%we need values because of tau
+	%deadline is a function of the overcurrent value
+	Our case study can be presented as a \ac{VDTA} $\mathcal{A}_{oc}$, as depicted in Figure~\ref{fig:vsa-overcurrent}. 
+	This \ac{VDTA} specifies that staying in an overcurrent state for too long without tripping the relay is a violation, and that entering a set current value that is beyond a safe maximum is a violation.
+	We encode this as a \ac{VDTA} with set of locations $L = \{ l_{safe},l_{unsafe}, l_{vio}\}$, with accepting locations F = $\{l_{safe}\}$, and $l_{safe}$ is the initial state. The set of external variables  $C = \{i, i_{set}, r\}$, where $i$ and $i_{set}$ are input channels of type integer, and $r$ is an output channel of Boolean type.  
+	The set of actions $\Sigma = \{tk(i, i_{set}, r)\}$, and the set of internal variables $V = \{i_{max}\}$, where $i_{max}$ is of type integer.
+	In the example, $\tau$ is a function with $i$ and $i_{set}$ as input parameters. 
+	
+	%We use the I/O specified in Example~\ref{ex:io}. 
+	
+	
+	
+	It can be seen that there are three violation transitions, labelled \textcircled{a}, \textcircled{b}, and \textcircled{c}.
+	Transition \textcircled{a} occurs when ${i_{set}}$ is greater than some safe physical value $i_{max}$, which is a physical property of the system itself. 
+	Likewise, \textcircled{b} also checks this property, but from location $l_{unsafe}$ instead of $l_{safe}$.
+	Finally, transition \textcircled{c} represents the case where the overcurrent time exceeds the safe time without the circuit breaker `trip' command being issued.
+\end{example}
+}
+
+Policy \ac{VDTA} are required to be \textit{deterministic}, i.e. for any given state, the conjunction of any guards of any other outgoing transitions may not be satisfiable; and \textit{complete}, i.e. for any given state at any given time and any valuation of variables in $C$, at least one transition guard is satisfied.
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Semantics for \ac{VDTA}}
+
+Let $\calA = \left(\Sigma, L, {l_0}, X, V, C, \Theta, F,  \Delta \right)$  be a VDTA.
+The semantics of $\calA$ is a timed transition system,
+where a state consists of a location, and valuations of internal variables $V$ and clocks $X$.
+Each transition is associated with values of external variables in $C$.
+
+\begin{definition}[Semantics of {VDTA}s]
+	\label{def:vdta:semantics}
+	The semantics of $\calA$ is a timed transition system $\sem{\calA}=( Q, q_0, Q_F, \Gamma, \to )$, defined as follows:
+	\squishlist
+	\item $Q = L \times {\cal D}_V \times \bbn^X$, is the set of states of the form $q= ( l,\nu ,\chi )$ where
+	$l \in L$ is a location,
+	$\nu \in {\cal D}_V$ is a valuation of internal variables,
+	$\chi$ is a valuation of clocks;
+	\item $Q_0 = \{ ( l_0,\nu, \chi_{[X \leftarrow 0]} )  \mid \Theta(\nu)=\true \}$ is the set of initial states;
+	\item $Q_F = F \times {\cal D}_V \times \bbn^X$ is the set of accepting states;
+	\item $\Gamma = \{ \eta \mid
+	\eta \in {\cal D}_{C}  \}$ is the set of transition labels;
+	\item $\to\subseteq Q\times \Gamma\times Q$  the transition relation
+	is the smallest set of transitions of the form
+	$( l,\nu,\chi \rangle \longrightarrow {\eta} \langle l',\nu',\chi')$
+	such that  $\exists ( l, G, A, l' ) \in \Delta$,
+	with $G^X(\chi + 1) \wedge G^D(\nu, \eta) $ evaluating to {\true},
+	$\nu'= A^D(\nu, \eta)$ and $\chi'=(\chi+1)[A^X \leftarrow 0]$.
+	\squishend
+\end{definition}
+
+
+%The set of timed words over $\Sigma$ where the actions carry parameter value and other data is denoted by $\tw(\Lambda)$.
+
+A {\em run} $\rho$ of $\sem{\calA}$ from a state $q\in Q$ over a {\em trace} $w =  \eta_1\cdot \eta_2\cdots \eta_n$ is a sequence of moves in $\sem{\calA}$:
+$\rho = q \xrightarrow {\eta_1} q_1
+\cdots q_{n-1}\xrightarrow {\eta_n} q_{n}$,
+for some $n\in\bbn$.
+A run is accepted if it starts from the initial state $q_0\in Q$ and ends in an accepted state $q_n \in Q_F$.
+%The set of runs from the initial state $q_0\in Q$,  is denoted $\Run(\calA)$ and $\Run_{Q_F}(\calA)$ denotes the subset of those runs {\em accepted} by $\calA$, i.e.,  ending in an accepting state $q_n \in Q_F$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{example}[Run of a VDTA]
+%Let us consider the VDTA %discussed in Example~\ref{eg:vdta}
+%presented in Figure~\ref{fig:vsa-overcurrent}. 
+An example run of the VDTA depicted in Figure~\ref{fig:vsa-overcurrent} is elaborated here.
+Let the internal variable $i_{max}$ be initialized with 10000.
+A run of this VDTA starting from the initial state $(l_{safe}, i_{max}=10000, x = 0)$ for the word $\sigma = (4000, 5000,1)\cdot (8000, 5000,1)\cdot (7000, 5000,1)\cdot (8000, 5000,1)\cdot (8000, 5000,1)\cdot (8000, 5000,1)$ is:\\
+{\small$
+(l_{safe}, i_{max}=10000, x = 0)
+\xrightarrow {(4000, 5000,1)} \\
+(l_{safe}, i_{max}=10000, x = 1)
+\xrightarrow {(8000, 5000,1)} \\
+(l_{unsafe}, i_{max}=10000, x = 0)
+\xrightarrow {(7000, 5000,1)} \\
+(l_{unsafe}, i_{max}=10000, x = 1)
+\xrightarrow {(8000, 5000,1)} \\
+(l_{unsafe}, i_{max}=10000, x = 2)
+\xrightarrow {(8000, 5000,1)} \\
+(l_{unsafe}, i_{max}=10000, x = 3)
+\xrightarrow {(8000, 5000,1)} \\
+(l_{vio}, i_{max}=10000, x = 4).
+$
+}
+
+The run started in the initial state and ended in a non-accepting state. It is thus a non-accepting run and represents a violation scenario.
+\end{example}
+

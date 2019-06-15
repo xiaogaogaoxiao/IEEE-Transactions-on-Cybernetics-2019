@@ -1,0 +1,34 @@
+\section{Conclusions}
+
+Neural networks are becoming commonly used in many  safety critical applications such as
+\acf{CPS}. 
+Considering the need for safety in such systems, there has been a rapid convergence of
+ideas from formal methods~\cite{formal-methods}, which are being adopted to ensure
+that neural networks operate safely. In spite of this promise, the progress to date is limited
+due to many challenges in verifying evolving data-dominated systems~\cite{seshia2016towards}.
+
+This paper proposes an alternative formal method that is based on run-time analysis, which is scalable and efficient. 
+We generalise a recently formalised run-time enforcement solution for
+CPS~\cite{theoryRE}. In doing so, we propose \acfp{ENN}, which enforce a set
+of formal policies that constrain the
+ input-output data values as well as the time at which results
+are produced. We demonstrate through two
+reasonably sized bechmarks that our approach may be used to
+either ensure better quality of service and safety. 
+With the
+\acf{AV} case study we show that run-time enforcement of
+neural networks can be used to deal with issues related to under
+/ over-trained systems. Overall, we show that run-time enforcement is
+a practical formal method for enhancing the safety of \acfp{ANN}.
+
+While this paper paves the way for safer design of neural networks,
+several key problems still remain. First, the development of \ac{WCET}
+analysers 
+need to be considered. Currently, the \ac{ESS} benchmark based on~\cite{chaudhari2017hybrid} is
+developed by us in Esterel and hence this code is already
+WCET-analysable. On the other hand, the \ac{AV} benchmark is not
+\ac{WCET} analysable, due to the dependence on the Darknet library.
+ Also, the generated code being based on C is amenable for
+ edge-devices in an IoT, which will be
+explored in the near future.
+

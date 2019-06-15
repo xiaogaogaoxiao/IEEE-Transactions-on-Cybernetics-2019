@@ -1,0 +1,60 @@
+
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=4cm, scale = 1, transform shape]
+
+\tikzstyle{accept} = [draw=blue!75,fill=blue!20]
+\tikzstyle{violate} = [draw=red!75,fill=red!40, dashed]
+\tikzstyle{unstable} = [draw=red!75,fill=red!15]
+
+\node[state, initial, accepting, accept] (A) {$l_{drive}$};
+\node[state, accepting, accept, unstable] (B) [right of=A] {$l_{brake}$};
+\node[state, violate]         (C) [below of=A, yshift=1cm]  {$l_v$};
+
+\path[->] 
+		(A) edge [loop above]       node [above, xshift=-4em, yshift=-0.8em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\overline{\big(B_H~|~(O_2~=~P)~|~B_S~|~(O_5~=~P)\big)}, \\ t := 0}$
+		} (A)
+		
+		(A) edge [bend left]		node [above, xshift=-1em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\overline{A}~\&\\~\big(B_H~\&~(O_2~=~P)~|\\~B_S~\&~(O_5~=~P)\big), \\ t := 0}$
+		} (B)
+	
+		(A) edge [right]	node [left, xshift=0em]
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\sum\textbackslash \Big(\overline{\big(B_H~|~(O_2~=~P)~|~B_S~|~(O_5~=~P)\big)}~|\\~\big(\overline{A}~\&~(B_H~\&~(O_2~=~P)~|\\~B_S~\&~(O_5~=~P))\big)\Big)}$
+		} (C)
+	
+		(A) edge [right]	node [right]
+		{
+			\textcircled{a}
+		} (C)
+	
+		(B) edge [loop above]		node [above, xshift=0em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\Big(t~<~T_{lim}~|\\~B_H~\&~(O_2~=~P)~|\\~B_S~\&~(O_5~=~P)\Big)~\&~\overline{A}}$
+		} (B)
+	
+		(B) edge [bend left]				node [above, yshift=0.1em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{t >= T_{lim}~\& \\ A~\&~\overline{B_H}~\&~\overline{B_S}~\&\\~\overline{(O_2~=~P)}~\&~\overline{(O_5~=~P)}}$
+		} (A)
+		
+		(B) edge [left]			node [right,yshift=-2em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\sum\textbackslash \Big(\big((t~<~T_{lim}~|\\~B_H~|~(O_2~=~P)~|\\~B_S~|~(O_5~=~P))~\&~\overline{A}\big)~|~\\~\big(t >= T_{lim}~\& \\ A~\&~\overline{B_H}~\&~\overline{B_S}~\&\\~\overline{(O_2~=~P)}~\&~\overline{(O_5~=~P)}\big)\Big)}$
+		} (C)
+	
+		(B) edge [left]			node [left]  
+		{
+			\textcircled{b}
+		} (C)
+	
+		(C) edge [loop left]		node [left]  
+		{
+			\scriptsize$\sum$
+		} (C)
+		;
+
+\end{tikzpicture}

@@ -1,0 +1,45 @@
+
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=3cm, scale = 1, transform shape]
+
+\tikzstyle{accept} = [draw=blue!75,fill=blue!20]
+\tikzstyle{violate} = [draw=red!75,fill=red!40, dashed]
+\tikzstyle{unstable} = [draw=red!75,fill=red!15]
+
+\node[state, initial, accepting, accept] (A) {$l_{safe}$};
+\node[state, accepting, accept, unstable] (B) [right of=A] {$l_{unsafe}$};
+\node[state, violate]         (C) [below of=B, yshift=1cm, xshift=-1.5cm]  {$l_v$};
+
+\path[->] 
+		(A) edge [loop above]       node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{A~\&~B}$
+		} (A)
+		
+		(A) edge [bend left]		node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\sum\textbackslash~(A~\&~B),\\O~:=~0,~t := 0}$
+		} (B)
+	
+		(B) edge [loop above]		node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{t~<~3~\&~\overline{C},\\O~:=~0}$
+		} (B)
+	
+		(B) edge [bend left]				node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{t~>=~3~\&~\overline{C}}$
+		} (A)
+		
+		(B) edge [bend left]			node [right]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{C}$
+		} (C)
+	
+		(C) edge [loop left]		node [left]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\sum}$
+		} (C)
+		;
+
+\end{tikzpicture}

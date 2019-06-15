@@ -1,0 +1,203 @@
+\section{Case study: \acf{AV} braking}
+\label{sec:case}
+
+\acfp{AV} are \acf{CPS} that are safety critical: any faults in their operation can lead to accidents resulting in injuries or fatalities.
+For instance, both Tesla's and Uber's have had accidents with their \acp{AV}~\cite{coldewey_2018}~\cite{stewart_2018}.
+In this paper, we take inspiration from such accidents and create a case study involving the braking mechanism of \acp{AV}.
+
+\subsection{\acf{AV} system}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{Content/fig/AV.pdf}
+	\caption{Sensor layout for the \ac{AV} example. \label{fig:av}}
+\end{figure}
+
+We propose an abstracted \acf{AV} represented in Figure~\ref{fig:av} as our case study.
+We deal with the linear, forward movement of the \ac{AV} and the braking involved with such movement.
+The \ac{AV} system consists of one \acf{AV}, interacting with other vehicles and pedestrians in its proximity, run by an autonomous controller, with 5 directional, sensor inputs (see Figure~\ref{fig:av}).
+The sensor package consists of five cameras, each with its own, unique field of view and a \acf{LiDAR} sensor.
+Each camera picks up a certain area relative to the \ac{AV}, and each camera has an associated \ac{LiDAR} reading for the area is is detecting.
+Each of the five cameras feeds into a \acf{MNN} ensemble~\cite{Maqsood2004} of \acp{SNN}, using the Darknet library~\cite{darknet13}, while the \ac{LiDAR} readings are passed directly to the controller.
+An \ac{ANN} ensemble is the parallel execution of multiple \acp{ANN} working in combination to produce more accurate output~\cite{Maqsood2004}.
+An ensemble can contain different \acp{ANN}, with different structures, inputs, outputs and even programming languages.
+The output of an \ac{ANN} ensemble represents some combination of all the \acp{ANN} in the ensemble.
+The output of an \ac{ANN} ensemble is more accurate than any individual \ac{ANN} in the ensemble.
+These are used to increase the prediction or classification of a system.
+These \ac{SNN} ensembles classify their input image and provide a confidence level for the classified image, before passing this information to the controller.
+The controller \ac{SNN} is a \ac{MLP}, and decides the best course of action given the environment and the status of the vehicle itself. 
+The current status of the vehicle is noted by the current speed of the vehicle ($S$) and the previous speed of the vehicle($S'$), taken from one synchronous tick in the past using the Esterel keyword \textit{pre}.
+The controller then outputs one of three simple commands to the vehicles actuators which are represented by an accelerator and a brake.
+These commands are as follows: accelerate ($A$); brake softly ($B_S$); and brake hard ($B_H$).
+A block diagram of the \ac{AV} used in this system is shown in Figure~\ref{fig:avnenf}. 
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[scale=0.6]{Content/fig/AV-sys-nenf.pdf}
+	\caption{Block diagram of the \ac{AV} system used in the case study. \label{fig:avnenf}}
+\end{figure*}
+
+The system controller, \acp{MNN} and sensor readings are all synchronous and, as such, the system is run using synchronous semantics.
+The synchronous language Esterel is used to run the entirety of the system controller and its connected components.
+The entire system is run in two logical ticks: a single tick for the plant and a single tick for the controller \ac{MLP}.
+The \ac{MNN} ensembles are run concurrently with each other, followed by the execution of the controller \ac{MLP} on the \ac{MNN} ensembles' outputs.
+The environment update is run in the same tick as the sensor readings and plant execution, with the environment updating before new sensor readings are taken.
+Tables~\ref{table:objects} and \ref{table:encoding} show the environment encoding of the system.
+
+\begin{table}[h]
+	\centering
+	\caption{Table showing the encoding of each of the \ac{AV}'s sensor detection}
+	\label{table:objects}
+	\begin{tabular}{@{}|l|l|l|@{}}
+		\hline
+		Detected object (O) & Symbol & Numerical Value \\ \hline
+		Pedestrian & P & 0 \\
+		Car & C & 1 \\
+		Nothing & N & 2 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table*}[t]
+	\centering
+	\caption{Table showing the encoding of the \ac{AV}'s environment}
+	\label{table:encoding}
+	\begin{tabular}{|p{0.3\textwidth}|p{0.1\textwidth}|p{0.25\textwidth}|p{0.2\textwidth}|}
+		\hline
+		Item & Symbol & Possible values & Possible numerical values \\ \hline
+		Camera Object $x$ & $O_x$ & [P, C, N] & $[0, 1, 2]$ \\
+		Camera Object $x$ Speed & $O_{x_S}$ & [Stationary, Slow, Fast] & $[0, 1, 2]$ \\
+		Camera Object $x$ Direction & $O_{x_D}$ & [North, East, South, West] & $[0, 1, 2, 3]$ \\
+		LiDAR Object $x$ & $L_x$ & [P, C, N] & $[0, 1, 2]$ \\
+		Speed & S & [Stationary, Slow, Fast] & $[0, 1, 2]$ \\
+		Previous Speed & S' & [Stationary, Slow, Fast] & $[0, 1, 2]$ \\
+		\hline
+	\end{tabular}
+\end{table*}
+
+Consider Table~\ref{table:encoding} and Figure~\ref{fig:av}.
+The environment for this \ac{AV} system consists of the \ac{AV} in question, and up to five other ``objects'' ($O$) in the environment.
+Each sensor position in the \ac{AV} system (Figure~\ref{fig:av}) can detect up to one object at that position at any one time, represented by the numbered position at which the object was detected.
+Each object can be a person ($P$), a car ($C$) or nothing ($N$).
+Each object detected by a camera is represented by the sensor position it is detected in and the type of object it is.
+The system used three possible speeds (stationary, slow, fast) represented by an integer value (0, 1, 2) respectively.
+The directions were limited to (North, East, South and West), represented by the numerical values (0, 1, 2 and 3) respectively.
+\begin{example}
+	A person behind the vehicle would be $O_{4}~=~0$, a vehicle directly in front would be $O_{2}~=~1$ and nothing to the right side of the \ac{AV} would be $O_{3}~=~2$.
+	Consider speed and direction: object 5 moving quickly would be $O_{5_S}~=~2$; the object to the left of the vehicle facing westward would be $O_{1_D}~=~3$.
+\end{example}
+
+The environment updates in such a way that objects move in the direction they are facing at a speed relative to the \ac{AV}.
+For example, a pedestrian facing the road and moving quickly would be placed in front of the vehicle in position 2 on the next tick.
+However, a pedestrian moving away from the road, or not moving at all, would be removed from the sensors detection areas on the next tick.
+To emulate camera behaviour we rely on the \ac{VOC} 2012 dataset~\cite{pascal-voc-2012}.
+Each tick, each camera will select an image from this dataset for processing by the corresponding \ac{MNN} ensemble.
+
+Due to this design of this system, it is possible for the vehicle to behave badly in various ways. 
+These include speeding, unnecessarily braking, hitting other vehicles on the road, hitting pedestrians on the road and even not driving at all.
+All of these scenarios can result in fatalities, thus classifying this system as a safety critical.
+To have a system that is safe, policies need to be enforced that monitor the system's inputs and outputs and ensure that none of the above scenarios take place under any circumstances.
+
+\subsection{Run-time enforcer for the \acf{AV} system}
+We propose the use of a run-time enforcer~\cite{recps} between the plant and controller (see Figure~\ref{fig:avenf}), to provide formal guarantees about the controller \ac{SNN}'s functional safety.
+This enforcer will monitor the I/O events of the controller \ac{SNN} and \textit{edit} unsafe events so that controller functions safely.
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[scale=0.6]{Content/fig/AV-sys.pdf}
+	\caption{Block diagram of the \ac{AV} system, with run-time enforcer, used in the case study. \label{fig:avenf}}
+\end{figure*}
+
+This run-time enforcer is set between the reactive controller and the plant and monitors the I/O of the controller.
+The controller consists of a decision \ac{MLP} which feeds into a post-processing unit.
+This receives inputs from the signal processing unit and \acp{MNN} ensembles through the input enforcer.
+The output from the controller is passed through the output enforcer before being sent to the appropriate actuators.
+The run-time enforcer for the \ac{AV} system enforces a set of policies ($\mathcal{V}$), described and defined in English here:
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{avpedrte.tikz}
+	\caption{\ac{VDTA} for describing the safety policy for the pedestrian detection $\mathcal{V}_{ped}$\label{fig:avpedrte}}
+\end{figure}
+
+$\mathcal{V}_{ped}$ (Figure~\ref{fig:avpedrte}): Ensure that the car does not behave unsafely around pedestrians. 
+
+The automaton starts in state $l_{drive}$, with a transition to itself if the vehicle is not braking and no pedestrian is in front.
+If the vehicle attempts to drive into a pedestrian or suddenly slam on the brakes for no reason, the violation transition to $l_v$ is taken as this is a potentially dangerous situation.
+ 
+When a braking action is started and a pedestrian is in front of the vehicle, the transition from $l_{drive}$ to $l_{brake}$ is taken and the timer $t$ is set to 0.
+From the $l_{brake}$ state, there is a transition back to $l_{brake}$ if $t$ is less than $T_{lim}$ ($t~<~T_{lim}$ where $T_{lim}~=~3$), or the vehicle is still braking, or there is a pedestrian in front, and the vehicle must not be accelerating.
+If the timer has reached (or passed) $T_{lim}$ ($t~>=~T_{lim}$), the vehicle has stopped braking and there is no pedestrian ahead, then the transition back to $l_{drive}$ is taken because it is safe to continue driving.
+If the vehicle attempts to accelerate before the timer reaches $T_{lim}$ ($t~<~T_{lim}$) or stops braking then the violation transition is taken to prevent potentially harmful actions.
+
+If a pedestrian remains off to the side of the vehicle, then either the vehicle should cruise, since pedestrians keeping to the side-walk are safe from the vehicle on the road.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{avcarrte.tikz}
+	\caption{\ac{VDTA} for describing the safety policy for the car detection $\mathcal{V}_{car}$\label{fig:avcarrte}}
+\end{figure}
+
+$\mathcal{V}_{car}$ (Figure~\ref{fig:avcarrte}): Ensure that the car does not drive into other vehicles. 
+This automaton only has a single safe state $l_{drive}$ and a violation state $l_v$.
+The transition to the violation state occurs when the vehicle is going faster that the car in front of it ($O_{2_S}~<~S~|~O_{5_S}~<~S$) and not braking appropriately.
+This could result in a situation where the \ac{AV} would be forced to try overtake or slam on the brakes, neither of which are safe actions.
+If the vehicle is going slower than the car behind it ($S~<~O_{4_S}$) and not accelerating, and there is no pedestrian in front of the vehicle, the transition to the violation also occurs.
+This could result in unsafe circumstances where the car behind is forced to slow down or take over.
+The transition to the safe state occurs if there is no violation.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{avdriverte.tikz}
+	\caption{\ac{VDTA} for describing the safety policy for driving according to the rules $\mathcal{V}_{drive}$\label{fig:avdriverte}}
+\end{figure}
+
+$\mathcal{V}_{drive}$ (Figure~\ref{fig:avdriverte}): The vehicle may not exceed the safe speed limit. 
+This automaton only has a single safe state $l_{drive}$ and a violation state $l_v$.
+This transitions to a violation when the vehicle attempts to accelerate while driving at the maximum speed (in this case when $S~=~2$), since speeding is against the law.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{avcnnrte.tikz}
+	\caption{\ac{VDTA} for describing the safety policy for the \ac{CNN} ensembles $\mathcal{V}_{cnn}$\label{fig:avcnnrte}}
+\end{figure}
+
+$\mathcal{V}_{cnn}$ (Figure~\ref{fig:avcnnrte}): The \ac{MNN} ensembles and the \ac{LiDAR} should agree on the detected objects.
+This automaton only has a single safe state $l_{drive}$ and a violation state $l_v$.
+Considering each sensor $x~\in~[1,5]$, the output of the \ac{CNN} ensemble network $x$ ($O_x$) must match the corresponding \ac{LiDAR} value ($L_x$).
+If they do match the transition back to the safe state is taken, and if they do no match ($\overline{O_x~=~L_x}$) then the violation transition is taken.
+If the confidence is high, and there is a mismatch, the output should be classified as a pedestrian ($O_x~=~P$) to consider the worst case and treat the unknown object with utmost care.
+
+It is possible to specify policies as \ac{VDTA} which encompass multiple safety rules.
+Though we have presented one safety rule per \ac{VDTA}, it is possible to specify policies as \ac{VDTA} which encompass multiple safety rules.
+
+\subsection{\acf{AI} for the \acf{AV} system}
+The \acp{AI} in this case study include the \ac{MNN} ensembles in the plant and a single \ac{MLP} \ac{SNN} for the controller.
+
+In this case study, each \ac{MNN} ensemble consisted of three \acp{CNN} feeding into an ensemble function.
+Each \ac{CNN} in the ensemble provided its output to an ensemble function, which then produced higher grade output using a custom averaging function based off the \acp{CNN}' class scores.
+Due to the synchronous nature of the \acp{CNN}, each \ac{CNN} was run in synchronous concurrency with the others to provide output to the ensemble function.
+	
+Each \ac{CNN} consists of 10 layers: a combination of convolutional, maximum pooling and average pooling layers.
+Each \ac{CNN} was trained for up to 100,000 epochs on the \acf{VOC} 2012 data set, using the Darknet C library~\cite{darknet13} to perform back-propagation with gradient descent.
+The \acp{CNN} took an input image of 28x28 pixels and output three class probabilities; one for a person, one for a car and one for nothing.
+
+The controller \ac{MLP} consisted of three layers of artificial neurons, with seventeen input neurons, ten hidden layer neurons and three output neurons.
+The implemented system and environment were complex enough that back-propagation was not an applicable method to train the controller, as it was not possible to map out every possible input set with a known output set.
+The controller \ac{MLP} was trained used a type of reinforcement learning called Q-learning~\cite{qlearning2010}.
+This training processes works by reinforcing good actions with positive rewards, and removing bad actions with negative rewards.
+Like the \acp{CNN}, this ac{ANN} was also trained for 100,000 epochs using this technique.
+The controller took the seventeen different inputs, as an array of integers, in the following order (using the previously defined labels in Table~\ref{table:encoding}): $(S, S', O_1, O_2, O_3, O_4, O_5, O_{1_D}, O_{2_D}, O_{3_D}, O_{4_D}, O_{5_D},\\ O_{1_S}, O_{2_S}, O_{3_S}, O_{4_S}, O_{5_S})$.
+The outputs of the controller were a binary array representing the actions that could be taken: $(A, B_S, B_H)$, where each value could be $1$ or $0$.
+An absence of all the outputs is seen as a ``cruise'' action, where the vehicle does not accelerate.
+
+Figure~\ref{fig:avmnn} is an expanded diagram of the \ac{AV} system, showing the \ac{ANN} layout for this system.
+Each \ac{MNN} ensemble is labelled by its corresponding sensor number and shows three \acp{CNN} feeding into a single ensemble function for each \ac{MNN}.
+The ensemble outputs are then passed to the controller \ac{SNN} \ac{MLP} via the input run-time enforcer.
+The controller's decision is made by its \ac{MLP}, and then passed back to the vehicle via the output enforcer.
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Content/fig/AV-MNN.pdf}
+	\caption{Diagram showing the \ac{SNN} for the \ac{AV}, and its interaction with the plant via the enforcer. \label{fig:avmnn}}
+\end{figure*}
+

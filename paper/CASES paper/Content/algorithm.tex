@@ -1,0 +1,159 @@
+\section{Runtime Enforcment Algorithm}
+\label{sec:re-algorithm}
+
+Let the automaton $\calA_{\varphi}=\left(L, {l_0}, X,  C,  F,  \Delta \right)$ with semantics $\sem{\calA_\varphi}=\left( Q, q_0, Q_F, \Gamma, \to \right)$ define property $\varphi$.
+\\ Input automaton $\calA_{\varphi_I}=\left(L, {l_0}, X,  C,  F,  \Delta_I \right)$ with semantics $\sem{\calA_\varphi{_I}}=\left( Q, q_0, Q_F, \Gamma, \to_I \right)$ is obtained from $\calA_{\varphi}$ by projecting on inputs (See section~\ref{sec:editfunc}).
+
+\begin{algorithm}[ht]
+	\caption{$\mathsf{Enforcer}$}
+	\label{algo:enf}
+	{
+		\begin{algorithmic}[1]
+			\STATE $t \gets 0$
+			\STATE $q \gets q_{0}$
+			\WHILE {$\true$}
+				\STATE $\eta_{It} \gets \readInp\left( \right)$
+				\label{algoEi-begin}
+				\IF {$\exists \sigma'_I\in\calD_I^*: q \xrightarrow{\eta_{It} \cdot \sigma'_I}_I q' \wedge q' \in Q_{F}$}
+					\label{algoEi-test}
+					\STATE $\eta'_{It} \gets \eta_{It}$
+				\ELSE
+					\STATE $\eta'_{It} \gets \selEditIaut\left(q\right)$
+				\ENDIF
+				\label{algoEi-end}
+				\STATE $\mathsf{call\_neural\_network\_\lambda\left(\eta'_{It}\right)}$
+				\STATE $\eta'_{Ot} \gets \readOut\left( \right)$
+				\label{algoEo-begin}
+				\IF {$\exists \sigma'\in\calD_C^*: q\xrightarrow{\left(\eta'_{It},\eta_{Ot}\right)\cdot \sigma'} q' \wedge q' \in Q_F$}
+					\label{algoEo-test}
+					\STATE $\eta'_{Ot} \gets \eta_{Ot}$
+				\ELSE
+					\STATE $\eta'_{Ot} \gets \selEditOaut\left(q, \eta'_{It}\right)$
+				\ENDIF
+				\label{algoEo-end}
+				\STATE $\release\left(\left(\eta'_{It}, \eta'_{Ot}\right)\right)$
+				\label{algoEo-release}
+				\STATE $q \gets q''$ ~~~~ {\footnotesize{where $q\xrightarrow{\left(\eta'_{It},\eta'_{Ot}\right)} q''\wedge q'' \not\in q_v $}}
+				\label{algo-stateUpdate}
+			%\STATE \red{$q_I \gets q''_I$} ~~~~ {\footnotesize{where $q_I \xrightarrow{x'_t}_I q''_I$}}
+				\STATE $t \gets t+1$
+			\ENDWHILE
+		\end{algorithmic}
+	}
+\end{algorithm}
+
+We provide an online algorithm that requires automata $\calA_{\varphi}$ and $\calA_{\varphi_I}$ as input.
+Algorithm~\ref{algo:enf} is an infinite loop, and an interaction of the algorithm is triggered at every time step.
+We join this algorithm to the neural networks through a \emph{reactive interface}, following the structure presented in Figure~\ref{fig:rebasic}.
+The \ac{MNN} system thus replaces connections to the enforced \ac{SNN} with connections to the run-time algorithm, and the run-time algorithm passes data to and from the \ac{SNN} by calling the instantaneous network function  $\mathsf{call\_neural\_network\_\lambda\left(\eta'_{It}\right)}$.
+
+In Algorithm~\ref{algo:enf}, $t$ keeps track of the time-step (i.e. \emph{tick}), and is initialized at 0, while $q$ keeps track of the state of both automata $\calA_{\varphi}$ and $\calA_{\varphi_I}$.
+Note that $q$ contains information about the current location $l$, the current valuations of internal variables $\nu$, and the current valuations of the clocks $\chi$.
+As the automaton $\calA_{\varphi_I}$ is created from $\calA_{\varphi}$ by projecting over the inputs, it therefore has an identical structure with the only difference being that output channels are ignored on the transitions of $\calA_{\varphi_I}$.
+%For each transition, the guards, resets, and internal variable assignments are the same in both automata.
+
+Functions $\readInp()$ and $\readOut()$ correspond to reading the input and output channels.
+Function $\release()$ takes an input-output event and releases it as the overall output of the enforcer.
+
+\begin{remark}
+	Note that in every tick, the values of external variables $\eta$ are known. 
+	The reachability check (whether an accepting state is reachable) used in lines 5 and 12 in Algorithm \ref{algo:enf}) is decidable.   
+	Functions $\selEditIaut()$ and $\selEditOaut()$ are the edit actions that the designer defines for each possible violation scenario in the property. Thus $\selEditIaut()$ and $\selEditOaut()$ are also computable.   
+\end{remark}
+
+
+\begin{figure}[b]
+	\vspace{-5mm}
+	\begin{lstlisting}[caption={Example compiled enforcer for VDTA in Figure~\ref{fig:vdta-car-rte}},label={lst:example}]
+void enf(me_t* me, inputs_t* inputs, outputs_t* outputs){
+	//no input enforcer
+	
+	//run network
+	lambda_run(inputs);	
+	//update timers
+	me->t++;	
+	//run output enforcer
+	switch(me->_policy_p_state) {
+		case l_safe:
+			break;
+		case l_brake:
+			if(inputs->P <= 100 && outputs->B < (100 - inputs->P) / 100) {
+				outputs->B = ( ( 100 - inputs->P ) / 100 );
+			} 
+			if((inputs->P > 100 && me->t <= 10) && outputs->B == 0) {
+				outputs->B = 0.01;
+			}	
+	}
+	//select transition to advance state
+	switch(me->_policy_p_state) {
+		case l_safe:
+			if(inputs->P > 100) {
+				me->state = l_safe;
+				break;
+			} 
+			if(inputs->P <= 100) {
+				me->state = l_brake;
+				me->t = 0;
+				break;
+			} 
+			//unreachable if VDTA is complete: check using unsatisfiable assert
+			assert(false);
+			break;
+	
+		case l_brake:
+			if((inputs->P <= 100 && outputs->B >= (100 - inputs->P) / 100) || 
+				((inputs->P > 100 && me->t <= 10) && outputs->B > 0)) {
+				
+				me->state = l_brake;
+				break;
+			} 
+			if(inputs->P > 100 && me->t >= 10) {
+				me->state = l_safe;
+				break;
+			} 
+			if(inputs->P <= 100 && outputs->B < (100 - inputs->P) || 
+				((inputs->P > 100 && me->t <= 10) && outputs->B == 0){
+				
+				me->state = violation;
+				break;
+			} 
+			//unreachable if VDTA is complete: check using unsatisfiable assert
+			assert(false);
+			break;
+	}
+	//ensure we did not violate (i.e. we did not enter violation state)
+	//check using assert
+	assert(me->state != violation);
+}\end{lstlisting}
+	\vspace{-5mm}
+\end{figure}
+
+
+
+Using Algorithm~\ref{algo:enf} as pseudo-code, we can compile \ac{VDTA} to semantic-equivalent C code for execution.
+
+
+\begin{example}
+	The \ac{VDTA} from Figure~\ref{fig:vdta-car-rte} can be compiled using Algorithm~\ref{algo:enf} to the C code presented in Listing~\ref{lst:example}.
+	Although there is no input enforcer (as there are no input edits), the causal flow can be observed: Input edits, $\lambda$ invokation, Output edits, and then \ac{VDTA} state update.
+	Line 14 is key: it demonstrates the $\selEditO$ action for value $B$, clamping it to the minimum allowable value specified by function $br\left(P\right)$.
+\end{example}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{definition}[$\efalgo$]
+	\label{def-algo-ef}
+	Consider a property $\varphi$ that is enforceable. 
+	The function $\efalgo:\calD_C^*\to\calD_C^*$,  is defined as follows:\\
+	Let $\sigma = \left(\eta_{I1}, \eta_{O1}\right) \cdots \left(\eta_{Ik}, \eta_{Ok}\right)\in\calD_C^*$ be a word received by
+	Algorithm~\ref{algo:enf} (representing the input (resp. output) channel values read in each tick). Then we denote
+	$\efalgo\left(\sigma\right)=\left(\eta'_{I1}, \eta'_{O1}\right) \cdots \left(\eta'_{Ik}, \eta'_{Ok'}\right)$, where $\left(\eta'_{It},\eta'_{ot}\right)$ is the
+	pair of input/output channel values released as output by Algorithm~\ref{algo:enf} in Step~\ref{algoEo-release},
+	for $t=1,...,k$.
+\end{definition}
+
+\begin{proposition}[Enforcer Correctness]
+	\label{prop-constraints-algo}
+	Given any enforceable property $\varphi$ defined as VDTA $\calA_\varphi$,
+	the function $\efalgo$ defined above is an enforcer for $\varphi$, that is,
+	it satisfies (\ref{eq:snd}), (\ref{eq:tr}), (\ref{eq:mono}), (\ref{eq:inst}), and (\ref{eq:ca}) constraints of Definition~\ref{def-E-func-constraints}.
+\end{proposition}

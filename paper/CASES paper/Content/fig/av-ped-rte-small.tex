@@ -1,0 +1,47 @@
+
+
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=3 cm, scale = 1, transform shape]
+
+\tikzstyle{accept} = [draw=blue!75,fill=blue!20]
+\tikzstyle{violate} = [draw=red!75,fill=red!40, dashed]
+\tikzstyle{unstable} = [draw=red!75,fill=red!15]
+
+\node[state, initial, accepting, accept] (A) {$l_{safe}$};
+\node[state, accepting, accept, unstable] (B) [right of=A] {$l_{brake}$};
+\node[state, violate]         (C) [below of=B, yshift=1cm, xshift=-1.5cm]  {$l_v$};
+
+\path[->] 
+		(A) edge [loop above,looseness=15]       node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{P > 100}$
+		} (A)
+		
+		(A) edge [bend left]		node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{P \leq 100, \\ t := 0}$
+		} (B)
+	
+		(B) edge [loop above,looseness=15]		node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\big(P \leq 100~\&~B \geq br\left(P\right)\big)~|\\\big(P > 100~\&~t\leq T_{lim}~\&~B>0\big)}$
+		} (B)
+	
+		(B) edge [bend left]				node [above]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{\left(P > 100\right)~\& \\ t > T_{lim}}$
+		} (A)
+		
+		(B) edge [left]			node [right, xshift=0em]  
+		{
+			\scriptsize$\let\scriptstyle\textstyle\substack{P \leq 100 ~\&~B < br\left(P\right)~|\\
+			\big(P > 100~\&~t \leq T_{lim}~\&~B=0\big)}$
+		} (C)
+	
+		(C) edge [loop left]		node [left]  
+		{
+			\scriptsize$\sum$
+		} (C)
+		
+		;
+
+\end{tikzpicture}

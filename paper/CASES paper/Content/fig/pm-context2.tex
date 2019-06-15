@@ -1,0 +1,46 @@
+\begin{tikzpicture}[->, >=stealth', shorten >=0.15mm, shorten <=0.15mm, semithick, scale=0.8, transform shape]
+
+\def\separation{20mm}
+
+\tikzstyle{line} = [draw, -latex']
+
+\tikzset{complete-box/.style={rectangle, draw, fill=none, minimum height=2.2cm, text width = 1.8cm, text centered}}
+
+\tikzset{dashed-box/.style={complete-box, dashed, fill=black!10}}
+
+
+\node[dashed-box]
+(Plant) {$Plant$};
+
+\node[complete-box, anchor=west] at ($ (Plant.east) + (\separation, 0) $)
+(Enforcer) {$Enforcer$};
+
+\node[dashed-box, anchor=west] at ($ (Enforcer.east) + (\separation, 0) $)
+(Controller) {$Controller$};
+
+\node [above = 0.25*\separation of Enforcer.north] (prop) {$\varphi$};
+
+
+\node [anchor=south] at ($ (Plant.north east) + (0.5*\separation, 0.125*\separation) $) (inputsLabel) {Inputs};
+
+\node [anchor=south] at ($ (Enforcer.north east) + (0.5*\separation, 0.125*\separation) $) (transformedInputsLabel) {Transformed Inputs};
+
+\node [anchor=north] at ($ (Enforcer.south east) + (0.5*\separation, -0.125*\separation) $) (outputsLabel) {Outputs};
+
+\node [anchor=north] at ($ (Plant.south east) + (0.5*\separation, -0.125*\separation) $) (transformedOuputsLabel) {Transformed Outputs};
+
+
+\draw[->] (Plant.40) -- node[above] { \small $A$ } (Enforcer.140);
+\draw[->] (Plant.20) -- node[above] { \small $B$ } (Enforcer.160);
+\draw[->] (Enforcer.200) -- node[above] { \small $C'$ } (Plant.340);
+\draw[->] (Enforcer.220) -- node[above] { \small $D'$ } (Plant.320);
+
+\draw[->] (Enforcer.40) -- node[above] { \small $A'$ } (Controller.140);
+\draw[->] (Enforcer.20) -- node[above] { \small $B'$ } (Controller.160);
+\draw[->] (Controller.200) -- node[above] { \small $C$ } (Enforcer.340);
+\draw[->] (Controller.220) -- node[above] { \small $D$ } (Enforcer.320);
+
+\draw[->] (prop.south) -- (Enforcer.north);
+
+
+\end{tikzpicture}
