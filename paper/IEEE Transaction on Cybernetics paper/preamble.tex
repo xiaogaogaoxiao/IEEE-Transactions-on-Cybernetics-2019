@@ -1,0 +1,123 @@
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+
+\usepackage[percent]{overpic}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+%\usepackage{multicol,amsmath,amsthm}
+
+%\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{url}
+\usepackage{xspace}
+
+%\usepackage{fancyvrb}
+%\usepackage{bm}
+
+\usepackage[format=plain,labelfont=up]{caption}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{afterpage}
+\usepackage{booktabs}
+\usepackage{comment}
+
+%\usepackage[dvipsnames,table]{xcolor}
+\usepackage{pgf}
+\usepackage{pgfplots,pgfplotstable}
+\usepackage{tikz}
+\usepackage{tikzscale}
+\usetikzlibrary{shapes,backgrounds}
+\usetikzlibrary{arrows,shapes,fit,automata,positioning,decorations,calc}
+\usetikzlibrary{spy,backgrounds}
+\usetikzlibrary{arrows.meta}
+\usepackage{siunitx}
+\pgfplotsset{compat=1.12}
+
+
+\usepackage{pslatex} % -- times instead of computer modern, especially for the plain article class
+%\usepackage[colorlinks=false,bookmarks=false]{hyperref}
+\usepackage{booktabs}
+
+\usepackage{multirow}
+%\usepackage{cite}
+\usepackage[normalem]{ulem} %for striking out text
+%
+
+\usepackage{calligra} %
+\usepackage{mathtools}
+
+
+\usepackage{dblfloatfix} %allows floats to be at bottom of page
+
+%tikz and associated stuff
+%\usepackage{verbatim}
+\usetikzlibrary{shapes,backgrounds}
+\usetikzlibrary{arrows,fit,automata,positioning,decorations,calc}
+\usetikzlibrary{spy}
+\usetikzlibrary{matrix,chains,decorations.pathreplacing}
+%\usetikzlibrary{arrows.meta}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usetikzlibrary{patterns}
+
+\usepackage[english]{babel}
+\usepackage{blindtext}
+
+\usepackage{acronym}
+
+%\usepackage[subtle]{savetrees}
+
+%\usepackage{flushend} % even out the last page, but use only at the end when there is a bibliography
+
+\newcommand\defeq{\stackrel{\mathclap{\scriptsize\mbox{def}}}{=}}
+\newcommand{\code}[1]{{\small{\texttt{#1}}}}
+
+% fatter TT font
+\renewcommand*\ttdefault{txtt}
+% another TT, suggested by Alex
+% \usepackage{inconsolata}
+% \usepackage[T1]{fontenc} % needed as well?
+
+\usepackage{float}
+\newcommand{\todo}[1]{{\color{orange}(TODO: #1)}}
+\newcommand{\hammond}[1]{{\color{blue} Hammond: #1}}
+\newcommand{\matthew}[1]{{\color{red} Matthew: #1}}
+\newcommand{\changed}[1]{{\color{red}#1}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section] % definition numbers are dependent on theorem numbers
+\theoremstyle{example}
+\newtheorem{example}[definition]{Example} % same for example numbers
+\theoremstyle{theorem}
+\newtheorem{thm}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+%\newtheorem{defn}{definition}[section]
+%\newtheorem{exmp}{example}[section]
+%\newtheorem{rem}{remark}
+
+\pgfplotsset{compat=1.11,
+	/pgfplots/ybar legend/.style={
+		/pgfplots/legend image code/.code={
+			\draw[##1,/tikz/.cd,bar width=3pt,yshift=-0.2em,bar shift=0pt]
+			plot coordinates {(0cm,0.8em)};
+		},
+	},
+}
+
+\newcounter{remarks}
+\newtheorem{remark}{Remark}

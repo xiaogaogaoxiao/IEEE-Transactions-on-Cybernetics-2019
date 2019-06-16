@@ -1,0 +1,260 @@
+
+\section{Results}
+\label{sec:resultsc4}
+
+Using the \ac{AV} case study and an \ac{ESS} benchmark the efficacy of the proposed approach is evaluated.
+Both systems are composed of multiple, \acfp{SNN}.
+The \ac{ESS} consists of 3 \acfp{MLP}, while the \ac{AV} system has 15 input \acfp{CNN} and a single controller \ac{MLP}.
+Using Definition~\ref{def:bb-mlp}, we wrap the \ac{ESS} \acp{MLP} and the \ac{AV}'s controller \ac{MLP} with runtime enforcers to create \acfp{ENN}.
+%, made up of several policies combined using the product rule defined in Section~\ref{def:detComplete}.
+
+\subsection{\acf{ESS} benchmark}
+
+An \ac{ESS} system uses an energy storage device (such as a battery)
+between a varying electrical load and the grid.
+The system is designed to purchase electricity from the grid when it is cheap and then use this to provide energy to the load when electricity is expensive. 
+Ideally, this will result in a lower per-unit cost for the same energy output.
+
+The \ac{ESS} is based on an electric car charging station in Singapore~\cite{chaudhari2017hybrid}.
+Here, the system operated on measured power prices for the period of one week.
+The demand for the charging station was based on real data, in one
+minute intervals, obtained from~\cite{authority2012singapore} and is represented in kW.
+The cost to purchase power is was recorded during the original study, and is represented by Singapore dollars per MWh of power (\$/MWh).
+
+Within the \ac{ESS}, the three \acp{MLP} perform three different roles to reduce per-unit energy cost.
+The first two\acp{MLP} predict the energy cost and energy demand respectively.
+The third \ac{MLP} controls the overall system, and chooses how much energy to purchase from the grid.
+ This is done by deciding how much to charge or discharge the system battery, while ensuring that demand is met.
+All three \acp{MLP} have three layers.
+The price prediction \ac{MLP} has 10 input neurons, 5 hidden neurons, and 1 output neuron; the demand prediction \ac{MLP} has 10, 10, and 1; and the controller \ac{MLP} has 20, 20, 3.
+
+To ensure safe operation of this system, we define two safety properties which can be enforced:
+(1) the system battery should not be asked to discharge if the \ac{SoC} is below 25\% nor should it be asked to charge if the \ac{SoC} is above 95\%;
+(2) the rate of charge and discharge (measured in amperes) should never exceeds a safe amount.
+Together, these properties increase the lifespan of the battery~\cite{guo2016mechanism}. 
+
+\subsection{\acf{AV} benchmark}
+
+The \ac{AV} system is introduced in Section~\ref{sec:av-casestudy}.
+For this, we can define four safety properties, focusing on the safety of pedestrians and the \ac{AV}'s passengers.
+The first property ensures that the vehicle brakes when necessary to avoid colliding with pedestrians on the road.
+A significant simplification of this policy is presented in Figure~\ref{fig:vdta-car-rte}.
+The second policy ensures that the vehicle brakes to avoid collisions with other vehicles.
+The third policy ensures that the vehicle is not speeding or suddenly slamming on the brakes.
+The final policy checks the LiDAR and \ac{CNN} ensemble outputs are
+consistent. If the LiDAR and \ac{CNN} are in conflict, 
+the object is defined as an "unknown" and treated with extra caution.
+The \ac{AV} input processing is managed by 5 \ac{CNN} ensembles for each of the 5 sensors, resulting in 15 \acp{CNN}, with each \ac{CNN} having 8 layers. 
+The \ac{AV}'s controller  MLP is 3 layers, with 17 input neurons, 10 hidden neurons, and 3 output neurons.
+
+\subsection{Methodology}
+\ac{VDTA} were first specified in a XML-based format and then compiled to C functions using the methodology outlined in Section~\ref{sec:re-algorithm}.
+These enforcer C functions were then synchronously composed~\cite{SynchronousLanguages12YearsLater} with the C neural networks developed using the Esterel programming language~\cite{Berry00}.
+For benchmarking purposes the case studies were then run on Ubuntu 16.04 using an 4 core Intel i7-6700HQ processor at 2.6GHz with 4GB of RAM.
+The \ac{AV} \acp{CNN} and \ac{ESS} predictor \acp{MLP} were trained using gradient descent with back-propagation.
+Then, the controller \acp{MLP} were trained using Q-learning.
+
+\subsection{Enforcement \acf{OH}}
+
+\begin{table}[h]
+	\vspace{-2mm}
+	\centering
+        \scriptsize{
+	\caption{Enforcement overheads}
+	\label{table:policies}
+	\begin{tabular}{|l|l|p{0.15\linewidth}|l|p{0.1\linewidth}|p{0.1\linewidth}|}
+		\hline Policy & States & Transition Comparisons & Timed &  Ex. Time (us) &  OH (\%) \\ \hline
+		\multicolumn{6}{|p{0.70\linewidth}|}{\ac{ESS}} \\ \hline 
+		$None$ 										& - & - & - & 2.70 & 0 \\ 	
+		$\varphi_{soc}$    							& 1 & 7 & No & 2.836 & 4.9 \\
+		$\varphi_{charge}$    						& 1 & 4 & No & 2.71 & 0.346 \\
+		$\varphi_{soc,charge}$  	& 1 & 11 & No & 2.84 & 4.935 \\ \hline       
+		\multicolumn{6}{|p{0.70\linewidth}|}{\ac{AV}} \\ \hline
+		$None$ 						& - & -  & -  & 736 & 0 \\
+		$\varphi_{cnn}$ 			& 1 & 15 & No & 764 & 3.8 \\
+		$\varphi_{drive}$ 			& 1 & 4 & No & 740 & 0.54 \\
+		$\varphi_{car}$ 			& 1 & 7 & No & 774 & 5.1 \\
+		$\varphi_{ped}$ 			& 2 & 56 & Yes & 767 & 4.2 \\
+		$\varphi_{cnn,drive,car,ped}$ 	
+		& 2 & 99 & Yes & 803 & 9.1 \\ \hline           
+	\end{tabular}
+}
+\vspace{-2mm}
+\end{table}
+
+To determine the overhead of using enforcers with our \acp{SNN}, the systems were run under simulation and average-case execution time was measured for 1,000 runs. 
+Then, the \acp{SNN} were converted to \acp{ENN}, and the systems were re-run and average-case execution time once again measured.
+Properties were specified as individual policies at first, and then manually combined into single large policies.
+The \acf{OH} is defined as percentage increase for the enforced runs compared to the un-enforced runs.
+The enforcement overheads are presented in Table~\ref{table:policies}.
+
+The \ac{AV} system's policies had the higher overall overhead (9.1\%), compared to the \ac{ESS} (4.935\%).
+This was expected, as the policies for the \ac{AV} system were larger and more complex than for the \ac{ESS}.
+
+\subsection{\acf{ESS} results}
+
+% Ess results
+\begin{table}[b]
+	\vspace{-2mm}
+	\centering
+        \small{
+	\caption{Comparison of ESS with and without enforced policies}
+	\label{table:essres}
+	\begin{tabular}{|p{0.46\linewidth}|p{0.1\linewidth}|p{0.10\linewidth}|p{0.10\linewidth}|}
+		\hline Performance metric & \ac{SNN} &  \ac{ENN} & ``Ideal'' \\ \hline
+		Times high charge/discharge power was detected & 52 & 0 & 0 \\ \hline      
+		Lowest battery \ac{SoC} (\%) & 21 & 25 & 25 \\ \hline
+		Minutes of critically low \ac{SoC} & 87 & 0 & 0 \\ \hline
+		Highest battery \ac{SoC} (\%) & 90.5 & 90.5 & 95 \\ \hline
+		Minutes of critically high \ac{SoC} & 0 & 0 & 0 \\ \hline
+		Daily cost of buying power (\$) & 335 & 336 & < 380 \\ \hline 
+	\end{tabular}}
+	\vspace{-2mm}
+\end{table}
+
+Table~\ref{table:essres} shows the instances of dangerous behaviour by the system over an entire run of the system using both the unenforced \ac{SNN} and the enforced \ac{ENN} as the controllers.
+For comparison, the ``ideal'' result is also presented, where ``ideal'' defines the safe or correct output for that particular performance metric.
+The input traces for the \ac{ESS} consisted of the current price per MWh, demand (in kW) for the last minute and the current \ac{SoC} of the battery.
+The output traces of the \ac{ESS} consisted of only the overall cost of the power i.e. a total price for the last minute of operation.
+
+The results highlight several interesting conclusions.
+The trained \ac{MLP} networks were able to derive operating conditions for the \ac{ESS}, which resulted in cost savings of \$45 per week. 
+However, to achieve this, it would operate in unsafe conditions, in one case leaving the battery \ac{SoC} at 21\% for 87 minutes.
+This is a large amount of time for the battery to spend undercharged and can cause damage to the battery~\cite{guo2016mechanism}.
+However, once the controller was combined with the enforcer to become an \ac{ENN}, all damaging behaviours were prevented.
+In addition, despite this constraint, the change in power cost (i.e. the dollar value of operating the \ac{ESS} for a whole day) was only increased by \$1 across the simulated week.
+
+\subsection{\acf{AV} results}
+
+The simulation environment for the \ac{AV} system was designed to test the system under an agressive environment, where the potential for accidents is large.
+%This environment simulation was done so as to validate the safety of the proposed methodology under very dangerous driving conditions.
+%This was necessary as the model \ac{AV} used in this case study (shown in Figure~\ref{fig:av}) is also simplified, and would not function well in a more accurate physics-based simulator.
+As such, the simulation environment consists of our single \ac{AV} driving in a probabilistically scripted environment, where it must interact safely with other scripted cars and pedestrians.
+In any given logical tick, the \ac{AV}'s five sensor packages can detect one of three things: either a pedestrian, a car, or nothing.
+Then, the \ac{AV} will classify each camera's output and attempt to respond accordingly.
+These five different camera inputs were fed into the five corresponding \ac{CNN} ensembles, where the camera images were classified.
+In order to simulate realistic camera inputs, relevant images from the well-known \acf{VOC} 2012 dataset~\cite{pascal-voc-2012} were selected and presented to the \ac{CNN} ensembles. 
+
+At the end of this processing stage, the environment updates, and each object in the environment of the car.
+For example, a pedestrian walking on the side of the road can take one of three actions: they can step backwards off the road, they can step onto the road and into danger, 
+or they could pause and wait for the car to pass.
+As the simulation environment is probabilistically scripted, it is possible for the actors within it to take dangerous decisions leading to accidents.
+For instance, pedestrians can step out in front of the \ac{AV}, and cars driving behind the \ac{AV} can disregard its braking motion leading to ``rear-end'' collisions, which is indicative of distracted divers. 
+Sometimes, this even leads to unavoidable accidents, where no matter the action the \ac{AV} takes a crash will still occur.
+For instance, pedestrians might step out in front of the \ac{AV} too close to safely stop.
+
+\begin{table}[htb]
+	\centering
+        \scriptsize{
+	\caption{AV system results using \acp{SNN} and \acp{ENN}}
+	\label{table:avenf}
+	\begin{tabular}{|p{0.15\linewidth}|p{0.15\linewidth}|p{0.15\linewidth}|p{0.12\linewidth}|p{0.18\linewidth}|}
+		\hline Number of epochs trained & Runs resulting in accidents (\%) & Average minutes to first accident per run (/100) & Average speed (km/h) & Unnecessary braking incidents per run (\%) \\ \hline
+		\multicolumn{5}{|p{0.75\linewidth}|}{Non-enforced \acp{SNN}} \\ \hline
+		0 & 100	 & 2.95 & 98 & 19 \\ \hline
+		$10^0$ & 100 & 3.12 & 93 & 19 \\ \hline
+		$10^1$ & 100 & 4.22 & 81 & 57 \\ \hline
+		$10^2$ & 100 & 6.05 & 59 & 24 \\ \hline
+		$10^3$ & 100 & 27.01 & 58 & 27 \\  \hline
+		$10^4$ & 45.5 & 73.9 & 18 & 63 \\ \hline
+		$10^5$ & 91.5 & 39.2 & 31.5 & 65 \\ \hline 
+		\multicolumn{5}{|p{0.75\linewidth}|}{Enforced \acp{ENN}} \\ \hline
+		0 & 75.7 & 52.5 & 45 & 0.7 \\ \hline 
+		$10^0$ & 70.2 & 57.5 & 47 & 4.2 \\ \hline 
+		$10^1$ & 88.5 & 41.0 & 37 & 20 \\ \hline 
+		$10^2$ & 79.5 & 50.4 & 41 & 17 \\ \hline 
+		$10^3$ & 80.5 & 89.9 & 40 & 18 \\ \hline 
+		$10^4$ & 6.0 & 97.07 & 27.5 & 27 \\ \hline   
+		$10^5$ & 8.5 & 97.14 & 29 & 28 \\ \hline                  
+	\end{tabular}}
+\end{table}
+
+To examine the affect of training on a given system, in the \ac{AV} example the controller \ac{MLP} was trained for a varying number of epochs
+ and then run in the simulation environment (input \acp{CNN} were trained to $10^4$ for all tests).
+Table~\ref{table:avenf} presents these results.
+As expected, when partially trained, the \ac{MLP} exhibits behaviour that is unexpected and usually unsafe, because \acp{ANN} gain robustness through training.
+However, this is to a point, and once reached, \acp{ANN} performance will begin to decrease as they are \emph{over-trained}, becoming tightly coupled with the training environment.
+To evaluate each level of training, the system was run 1,000 times, where each run consists of 100 logical ticks.
+If an accident of any kind occurs, it (and its cause) is recorded.
+%This means it will not operate well outside of the training data set.
+%Under-trained and over-trained systems can demonstrate how \ac{RE} can prevent unsafe events in a system that does not behave as expected.
+
+
+%If a space that did not contain a person or a vehicle, there would be a chance for a person or vehicle to "appear" in that space, within reason.
+%For example, person could not just "appear" right in front of the \ac{AV}, they would only be able to appear on the side of the road, or in the distance ahead of the \ac{AV}.
+
+
+
+%This could result in accidents out of the control of the \ac{AV}.
+%Take a pedestrian walking on the side of the road: they could, during an update, step onto the road in-front of a fast moving \ac{AV}.
+%In such a scenario, the \ac{AV} would slam the brakes to stop as quickly as possible. 
+%However, if the vehicle behind the \ac{AV}, driving just as fast as the \ac{AV}, did not also slam on the brakes, they would collide with the \ac{AV}.
+%This would result in an accident being recorded in that run.
+
+
+
+\ignore{
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{avgraph.tikz}
+	\caption{\ac{AV} system performance using \acp{SNN} and \acp{ENN} across training epochs. Higher is better. \label{fig:avtrained}}
+\end{figure}
+
+
+Figure~\ref{fig:avtrained} shows the average duration (normalized to 100) that the system was able to run at every epoch of training before an accident occurred. 
+As can be seen, the performance (i.e. the time to first accident) of the system increases with training until 10,000 epochs. 
+Here, it peaks, and then begins to decline as the \acp{ANN} become over-trained. 
+}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[]{avgraphacc.tikz}
+	\caption{\ac{AV} system accident rate using \acp{SNN} and \acp{ENN} across training epochs. Lower is better. \label{fig:avaccidents}}
+	\vspace{-4mm}
+\end{figure}
+
+The \ac{AV} system's accident rate as a percentage of simulation runs is presented in Figure~\ref{fig:avaccidents}.
+To begin with, the \ac{AV} is controlled purely by an \ac{MLP} \acp{SNN}, which is receiving processed data from ensembles of \acp{CNN} and Lidar sensors.
+At first, when the training of the \ac{MLP} and \ac{CNN} is low, the accident rate of the system is 100\% --- that is, every run results in an accident.
+The networks are then trained for a variety of epochs.
+At $10^4$ epochs, the highest performance is observed, with around 45\% of runs resulting in an accident.
+As training continues beyond this, the networks begin to over-fit, and performance begins to decrease. 
+
+%was measured by the amount of time the \ac{AV} was able to run before an accident occurred within the system and by the total number of accidents in all 1,000 runs.
+Then, the \ac{RE} mechanism is added to the controller, converting the
+controller \acp{SNN} to \acp{ENN} across all levels of training.
+The best result for the system occurs when the enforcer (providing a
+minimum quality of service) is combined with the well-trained \ac{SNN}
+justifying the need for \ac{ENN} over just \ac{SNN} or \ac{RE}.
+Within every instance a decrease in accident rate can be observed, as the enforcer is now constraining the behaviour of the \acp{ANN} driving the \ac{AV}, pre-empting obviously unsafe driving commands from being actuated.
+Then, as the \acp{ANN} become ``smarter'' as they are trained further, the system continues to grow safer. 
+At peak performance (at $10^4$ epochs), only 6\% of runs featured an accident, and interestingly, over-training the \acp{ANN} did not significantly increase this percentage.
+\textbf{This indicates a potential applicability for \acp{ENN} in many autonomous systems where the ideal amount of training for the system is unknown.}
+Furthermore, when the `crash' data of the enforced system above $10^4$ epochs is examined, \emph{all} accidents were caused \emph{unavoidably}, e.g. by rear-end collisions.
+
+%\pr{given this result, a reviewer might argue that we could simply replace the controller by the enforcer. We have to discuss this aspect.}
+
+%These graphs show that the
+
+%Over-training is a well known phenomenon that \acp{ANN} suffer. 
+%Over-training occurs when \acp{ANN} become too well trained on the data set they are trained with and, as a result, perform poorly on extrapolated data sets.  
+%Due to the nature of the training algorithm and the data used, the system began to make more unsafe decisions in lieu of increasing the average speed of the vehicle.
+
+
+
+%Driving performance as a percentage of runs is presented in Figure~\ref{fig:avaccidents}.
+%This shows us that although the training of the \acp{ANN} controlling the \ac{AV} improves the performance of the vehicle in our dangerous simulated environment, it never gets below around 55\% of runs featuring an accident. 
+%Further, this is a narrow window, where the \acp{ANN} are trained for 10,000 epochs.
+%However, when integrated with the \ac{RE}, only around 8\% of runs feature an accident, and interestingly, over-training the \acp{ANN} does not significantly increase this percentage.
+%This has applicability in many autonomous systems, where the ideal amount of training for the system is unknown. 
+
+
+
+%The \ac{RE} of the \ac{AV} system increased the safety of the \ac{AV} system proportionally to the amount of training the system had, with the exception of an over-trained system.
+%The over-trained system was shown to be just as safe as the best trained system when the run-time enforcer was used.
+%However, the results also showed that the enforced system behaved just as safely when over-trained as it did under-trained, or even perfectly trained. 
+
+%It should be noted that \emph{all} of the incidents of the enforced system were due to rear-end collisions. 
+%The policies that were in place to protect pedestrians were correctly implemented and worked impeccably.
+%However, due to the more erratic and unsafe behaviour of the untrained system, the enforcer was forced to frequently slow the car down from high speeds, resulting in more rear-end collisions.
+%Thus, the enforcer performed to its full capacity, implementing all four safety policies correctly.

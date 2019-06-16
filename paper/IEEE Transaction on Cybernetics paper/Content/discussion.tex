@@ -1,0 +1,38 @@
+\section{Discussion}
+\label{sec:discussion}
+
+The \ac{ESS} (Table~\ref{table:essres}) showed that the enforcer increased safety by preventing dangerously low \acf{SoC}.
+
+The \ac{AV} system, when using \ac{RE} to enforce some safety policies, showed a large increase in safety.
+Without the enforcer, at best the system was able to run for 73 ticks before an accident occurred, according to Table~\ref{table:avenf}.
+At lower epochs of training, the system was able to run for at most 3 ticks before an accident occurred.
+However, when the enforcer was implemented, the system was able to run for up to 97 ticks before an accident occurred.
+At its worst trained epoch, the system was still able to run for 58 ticks.
+It is worth noting that not all accidents are avoidable, for instance the \ac{AV} can be hit by a vehicle from behind while it is slowing down to prevent an accident with a pedestrian in front.
+These types of unavoidable accidents make up the majority of the total accidents for the more trained \acp{MNN}.
+
+Table~\ref{table:avenf} also shows that the number of the accidents over all runs in the system decreased as the system was trained, even with the enforcer in place.
+An untrained \ac{SNN} would have an accident on 75\% of the runs, while the same \ac{SNN} trained for 100,000 epochs would only have an accident 57\% of the time.
+This shows that the enforcer, while increasing the safety of the system, does so proportionally to the level of training of the \ac{SNN}.
+
+While the enforcer allowed the vehicle to drive safely for longer periods of time, it did not decrease the number of incidents in the system proportionally to the time the vehicle stayed safe.
+Likewise, the enforcer did not result in the vehicle driving at a reasonable speed.
+With or without the enforcer, the vehicle braked more often and drove more slowly.
+We can conclude that the enforcer did efficiently increase the safety of the system by allowing the system to run for longer, however other aspects of the systems safety, like the total number of accidents, were dependant on the amount of the training the \ac{ANN} had.
+This shows that the amount of training the \ac{SNN} has is relevant and makes a difference to the overall safety of the system.
+
+As the \ac{SNN} was trained, it exhibited more careful behaviour; the vehicle's average speed decreased at and the vehicle performed more braking actions than necessary.
+Even with the enforcer in place, the speed decreased in proportion to the number of epochs trained, while the vehicle still was still braking unnecessarily.
+While the enforcer does help the \ac{ANN} act more carefully, the a less trained \ac{ANN} will still behave less carefully than a more trained \ac{ANN}.
+
+In this work, we have presented an approach for synchronous composition of \acf{RE} with \acfp{SNN} for \acp{CPS}.
+Our case study and benchmarks demonstrate that policies specifying safe I/O behaviours for \acp{ANN} can be enforced.
+These enforced policies are shown to increase the safety and efficiency of the systems within which they are placed, without adding a large overhead to the system and without negatively influencing the functionality of the system.
+
+Being able to reactively verify \ac{ANN} properties allows the use of \ac{ANN} that are difficult, or impossible, to verify in \ac{CPS}.
+This solves a lot of problems that the static verification of \ac{ANN} has not yet solved.
+Gehr et al~\cite{Gehr2018AI2SA} introduce a very effective static verification method for the robustness of \acp{ANN}.
+However, this method does scale with the size of the ]ac{ANN} well, however it would still take longer periods of time to verify larger networks.
+Additionally, this method only works for \acp{ANN} using the ReLu activation function and does not handle more complex, non-linear activation functions.
+Finally, this method is not fool proof, not always being able to identify and prove all the specified robustness properties. 
+Our reactive method of verifying \acp{ANN} using \ac{RE} allows the reactive verification, finding and correcting faults that may have been missed during static analysis.

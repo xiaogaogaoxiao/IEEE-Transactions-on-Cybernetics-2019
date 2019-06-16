@@ -1,0 +1,89 @@
+\newcommand{\efalgo}{\ensuremath{{E_{\varphi}^*}}}
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+\newcommand{\df}{\stackrel{df}{=}}
+\newcommand{\dfs}{=_{\scriptstyle{df}}}
+\newcommand{\miff}{\mbox{\it iff\/}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}\xspace}
+\newcommand{\ignore}[1]{{}}
+\newcommand{\Scott}{\ensuremath{\mathbb S}\xspace}
+\newcommand{\Real}{\ensuremath{\mathbb R}\xspace}
+\newcommand{\Bool}{\ensuremath{\mathbb B}\xspace}
+\newcommand{\Nat}{\ensuremath{{\mathbb N}}\xspace}
+\newcommand{\cNat}{\ensuremath{{\mathbb N}_{\infty}}\xspace}
+\newcommand{\modd}{\ensuremath{\mathrel{\textit{mod}}}\xspace}
+\newcommand{\maxd}{\ensuremath{\textit{max}}\xspace}
+\newcommand{\mind}{\ensuremath{\textit{min}}\xspace}
+\newcommand{\zero}{\ensuremath{\mathbb{0}}\xspace}
+\newcommand{\one}{\ensuremath{\mathbb{1}}\xspace}
+
+\newcommand{\pr}[1]{{\textsf{\color{red} \small{[#1 -pr-]}}}}
+\newcommand{\hp}[1]{{\textsf{\color{red} \small{[#1 -hp-]}}}}
+\newcommand{\hw}[1]{{\textsf{\color{red} \small{[#1 -km-]}}}}
+\newtheorem{prop}{Proposition}
+
+\newcommand{\bbb}{\mathbb{B}}
+\newcommand{\bbn}{\mathbb{N}}
+\newcommand{\bbr}{\mathbb{R}}
+\newcommand{\Rnn}{{\bbr}_{\geq 0}}
+\newcommand{\calL}{{\mathcal L}}
+\newcommand{\calP}{{\mathcal P}}
+\newcommand{\calA}{{\mathcal A}}
+\newcommand{\calD}{{\mathcal D}}
+\newcommand{\calV}{{\mathcal V}}
+\newcommand{\exec}{\mathit{exec}}
+\newcommand{\true}{\ensuremath{\mathsf{true}}}
+\newcommand{\false}{\ensuremath{\mathsf{false}}}
+\newcommand{\pref}{\preccurlyeq}
+\newcommand{\sem}[1]{[\!\left[#1\right]\!]}
+\newcommand{\bin}[1]{\overrightarrow{#1}}
+
+\newcommand{\ef}{\ensuremath{E_{\varphi}}}
+
+\newcommand{\red}[1]{{\color{red}#1}}
+
+\DeclareMathOperator{\Run}{Run}
+
+\newcommand{\ptick}{\mathsf{ptick}}
+\newcommand{\editI}{\mathsf{editI_{\varphi_I}}}
+\newcommand{\editO}{\mathsf{editO_{\varphi}}}
+\newcommand{\editIaut}{\mathsf{editI_{\calA_{\varphi_I}}}}
+\newcommand{\editOaut}{\mathsf{editO_{\calA_\varphi}}}
+\newcommand{\randEditI}{\mathsf{{rand}\mbox{-} editI_{\varphi_{I}}}}
+\newcommand{\randEditO}{\mathsf{{rand}\mbox{-} editO_{\varphi}}}
+\newcommand{\randEditIaut}{\mathsf{{rand}\mbox{-} editI_{\calA_{\varphi_{I}}}}}
+\newcommand{\randEditOaut}{\mathsf{{rand}\mbox{-} editO_{\calA_\varphi}}}
+
+\newcommand{\selEditI}{\mathsf{{sel}\mbox{-} editI_{\varphi_{I}}}}
+\newcommand{\selEditO}{\mathsf{{sel}\mbox{-} editO_{\varphi}}}
+\newcommand{\selEditIaut}{\mathsf{{sel}\mbox{-} editI_{\calA_{\varphi_{I}}}}}
+\newcommand{\selEditOaut}{\mathsf{{sel}\mbox{-} editO_{\calA_\varphi}}}
+
+\newcommand{\dist}{\mathsf{dist}}
+
+\newcommand{\minEditI}{\mathsf{{minD}\mbox{-} editI_{\varphi_{I}}}}
+\newcommand{\minEditO}{\mathsf{{minD}\mbox{-} editO_{\varphi}}}
+\newcommand{\minEditIaut}{\mathsf{{minD}\mbox{-} editI_{\calA_{\varphi_{I}}}}}
+\newcommand{\minEditOaut}{\mathsf{{minD}\mbox{-} editO_{\calA_\varphi}}}
+
+\newcommand{\readInp}{\mathsf{read\_in\_chan}}
+\newcommand{\readOut}{\mathsf{read\_out\_chan}}
+\newcommand{\release}{\mathsf{release}}
+%\texttt{ptick}
+
+\newcommand{\okI}{\mathit{OK\_solutions_I}}
+\newcommand{\okO}{\mathit{OK\_solutions_O}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\squishlist}{
+	\begin{list}{$\bullet$}
+		{ \setlength{\itemsep}{0pt}
+			\setlength{\parsep}{1pt}
+			\setlength{\topsep}{1pt}
+			\setlength{\partopsep}{0pt}
+			\setlength{\leftmargin}{0.9em}
+			\setlength{\labelwidth}{1.5em}
+			\setlength{\labelsep}{0.4em} } }
+	\newcommand{\squishend}{
+\end{list}  } 

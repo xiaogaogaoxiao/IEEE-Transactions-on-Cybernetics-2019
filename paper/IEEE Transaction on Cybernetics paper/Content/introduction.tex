@@ -1,0 +1,111 @@
+\section{Introduction}
+\IEEEPARstart{A}{NN} have excelled in many applications such as
+image and video processing to pattern classification. With the advent
+of deep neural networks, they have excelled at achieving a level of
+precision that far exceed humans, particularly those related to machine
+vision.  More recently, their usage has moved from routine decision
+making to more complex tasks that involve interaction with
+automated control algorithms. This is especially concerning as deep neural networks are
+being used in \acf{CPS} such as autonomous vehicles,
+where no errors in control decisions may be tolerable. 
+
+Any \ac{CPS}
+consists of one or more distributed embedded systems, called the controllers, which are used
+for controlling physical processes, called the plant.
+In contract to the
+\emph{data-driven} approach of neural networks, \ac{CPS} are often designed starting
+from formal models~\cite{formal-methods}. These can be analysed at a
+higher-level of abstraction prior to exposing the validated models to
+automated code generation. Such approaches for
+\ac{CPS} are classified as \emph{model-based design}. There are tools
+such as SCADE~\cite{SCADE} based on this philosophy, which generate
+correct-by-construction code compliant with safety standards.
+
+While \ac{CPS} typically used conventional controllers designed using
+mode-based approaches, recent applications such as
+autonomous vehicles need data-driven processing using video-streams
+from its sensors to automatically detect obstacles or traffic
+signs. Such tasks are accomplished using \acfp{CNN}. These data-driven processing tasks need to interact with
+conventional control tasks such as ABS-braking or adaptive cruise control.
+Considering this, there is recent
+research momentum in achieving convergence between the usual
+model-driven approaches used in CPS and the more recent data-driven
+approaches used in conventional AI based on statistical techniques~\cite{tripakis2018data}.
+
+In~\cite{seshia2016towards} Seshia et al. consider some key challenges of 
+using formal methods to verify neural networks. These include the
+difficulty in creating mathematical models and the difficulty in
+formalising requirements. There is also the
+added challenge of designing scalable verification algorithms for
+static analysis of neural networks. More recently, there has been
+an attempt at developing abstract interpretation-based
+solution~\cite{Gehr2018AI2SA} for the verification of CNNs. 
+%They
+%demonstrate through a series of reasonable benchmarks that their
+%approach is both robust and scalable. 
+
+\ignore{However, they mainly
+concentrated on the issue of adversarial perturbations, which
+significantly impact the robustness of CNNs. Also, we believe that the
+scalability results over larger benchmarks of this approach need to be
+considered. Finally, no existing work deals with the verification of
+timing properties, which is an essential aspect of all CPS.}
+
+CPS applications such as autonomous vehicles need real-time decision
+making. This not only requires functional but also timing
+validation. {\bf To the best of our knowledge,
+there are no known methods for the systematic design of 
+AI applications with timing requirements. This is our focus}.
+
+We adopt a recent extension of of neural networks,
+which are made periodic, termed \acfp{SNN}~\cite{sann}. 
+This defines execution loops for \acp{ANN}, 
+where in each loop, the network first reads
+inputs from sensors, then processes the input in
+a series of one or more logical ticks (a concept borrowed from synchronous programming languages~\cite{SynchronousLanguages12YearsLater}),
+and finally it releases computed outputs.
+This loop can be executed indefinitely.
+Thanks to their underlying synchronous semantics, the loop timing properties can be computed, i.e. the loops are amenable to worst case execution time analysis~\cite{TheWCETProblem}. 
+\acp{SNN} thus formalise the design of reactive controllers using neural networks.
+
+We propose a new class of policies for enforcing safe behaviour
+of \acp{SNN} using \ac{VDTA}. A \ac{VDTA} can
+constrain the behaviour of an \ac{SNN} to only produce a subset of
+behaviours that are both value and time compatible with the
+specification. Given a set of \ac{VDTA}-based requirements, we
+automatically generate an enforced \ac{SNN} called an \acf{ENN}, where we synthesise an input enforcer to  ensure that all
+inputs from the plant are policy compliant. We then feed the enforced
+inputs to the neural network. Once the neural network completes its
+computation at the end of the reactive cycle, we pass the outputs
+through an output enforcer to ensure that all outputs are also policy
+compliant. This way, we ensure that an \ac{ENN} behaves in a safe and
+timely manner during every tick of its execution.
+
+The main contributions of the paper are as follows: First, we propose
+a new architecture of neural networks called \acfp{ENN},
+which are developed specifically for CPS. \acp{ENN} are the first proposal
+for ensuring both functional and timing safety of neural
+networks. Second, we propose \ac{VDTA} for \acp{ENN},
+which are specifically designed to constrain both the values of the
+data and the timing of when the results are
+produced. This generalises the earlier specification frameworks using
+timed automata (that use either discrete or continuous clocks). Third,
+through two benchmarks involving both \acp{ANN} and \acp{CNN} we demonstrate
+the effectiveness of the developed approach in enhancing safety. 
+These benchmarks are developed using the Esterel~\cite{Berry00}
+synchronous language, which provides an ideal platform for 
+safety-critical systems. As Esterel supports C-based
+\texttt{host-functions}, 
+existing C-based libraries for neural networks can be
+integrated to aid the development of
+complex applications.
+
+The rest of the paper is organised as follows. In Section 2, we introduce
+an overview of the proposed solution using \acp{ENN}. Section 3
+presents the motivating example of an autonomous
+vehicle. Section 4 presents the specification of timed and valued
+policies using \acp{VDTA}. Section 5 presents a set of constraints that ensure
+enforcer correctness. Section 6 presents the enforcement algorithm and
+also illustrates the enforced AV system. Section 7 discusses the
+results and Section 8 presents related work. Section 9 concludes the
+paper.

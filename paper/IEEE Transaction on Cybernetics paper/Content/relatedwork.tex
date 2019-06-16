@@ -1,0 +1,43 @@
+
+\section{Related Work}
+Functional safety, using standards such as IEC61508~\cite{iec61508}, ensures that the system meets reasonable level of safety by active mitigation of risks. 
+Hardware safety is ensured by reliability analysis while software safety is ensured 
+by the use of systematic development methods. There has been many attempts in the direction of functional safety of 
+ \acp{ANN}~\cite{functional-safety, scann, SCANNStandard, EstSafeCriteria2003, ANNDevModel1999, ANN-test}. 
+ \ignore{Removed reference ANNSafetyLifecycle2003}
+IEC61508, from which many other standards are 
+derived, uses safety integrity levels (SIL) and higher SIL levels recommend the use of formal methods.
+
+As neural networks are widely used in safety critical systems, there is significant interest in formal methods for AI. Tripakis discusses
+the need for convergence in methods between model-driven design and data-driven design in~\cite{tripakis2018data}. 
+Okano et. al. explore model checking using timed automata~\cite{timed-enf-autonomous}. Also, the use of \acf{SMT} is explored recently for the 
+robustness verification of \acp{DNN}\cite{Gehr2018AI2SA,reluplex}.
+\ignore{Removed reference DeepANNverify}
+However, static verification still poses considerable challenges~\cite{seshia2016towards}.
+
+\ac{CPS} require both functional and timing verification. The issue of timing verification has received scant attention except 
+the recent proposal for \ac{WCET} analysable neural networks~\cite{sann}. No proposal exists to date for automatic verification 
+of both functionality and timing. Considering this, we  propose \acp{ENN} by combining neural networks with \acf{RE}. 
+
+While \ac{RE} for transformational systems~\cite{theoryRE} is 
+a well developed area, \ac{RE} for reactive systems is an emerging area of research. Initial proposals were uni-directional enforcers~\cite{bloem2015shield}. 
+More recently, bi-directional enforcement is developed for CPS~\cite{theoryRE}.
+However, these operate over Boolean streams and hence not general enough for \acp{ANN}. 
+Another recent work \cite{Leucker:2018} proposed an approach for runtime monitoring of real-time valued signals. 
+However, the approach only deals with runtime verification (checking for satisfaction of a given property at runtime).
+This paper generalises the problem of bi-directional enforcement over 
+valued input and output including timed properties for the first time.
+
+
+\ignore{
+The concept of \ac{RE} of autonomous systems has received some research attention. 
+De Niz et. al. propose a type of \ac{RE} they term temporal enforcement, which ensures that the system controller meets timing deadlines where outputs are concerned~\cite{safe-enforce-auto}. 
+While this shares similarities with the work in this paper, their work does not expand to cover \acp{ANN}, and does not propose the use of \ac{RE} for anything other than meeting timing deadlines.
+Aniculaesei et. al. propose static formal verification and output run-time monitoring of basic, semi-autonomous, robotic systems to prevent physical collisions during system execution~\cite{runtime-monitor}.
+The controller used in their system does not contain form of \ac{AI} and their enforcer only monitors the controllers outputs, unlike our approach which uses previously introduced \acp{SNN} as \ac{AI} controllers and supports bi-directional run-time enforcement.
+
+Roop et al~\cite{sann} introduced \acfp{SNN}.
+\acf{WCET} timing verification of these \acp{SNN} was possible on time predictable processors.
+As such, these \acp{SNN} could be used in systems with strict timing deadlines.
+\acp{SNN}, however, do not provide any \emph{functional} verification or safety to these systems.
+}
