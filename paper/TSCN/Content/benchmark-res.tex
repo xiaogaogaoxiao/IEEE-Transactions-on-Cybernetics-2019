@@ -206,12 +206,6 @@ As can be seen, the performance (i.e. the time to first accident) of the system 
 Here, it peaks, and then begins to decline as the \acp{ANN} become over-trained. 
 }
 
-\begin{figure}[htb]
-	\centering
-	\includegraphics[]{avgraphacc.tikz}
-	\caption{\ac{AV} system accident rate using \acp{SNN} and \acp{ENN} across training epochs. Lower is better. \label{fig:avaccidents}}
-	\vspace{-4mm}
-\end{figure}
 
 The \ac{AV} system's accident rate as a percentage of simulation runs is presented in Figure~\ref{fig:avaccidents}.
 To begin with, the \ac{AV} is controlled purely by an \ac{MLP} \acp{SNN}, which is receiving processed data from ensembles of \acp{CNN} and Lidar sensors.
@@ -220,6 +214,13 @@ The networks are then trained for a variety of epochs.
 At $10^4$ epochs, the highest performance is observed, with around 45\% of runs resulting in an accident.
 As training continues beyond this, the networks begin to over-fit, and performance begins to decrease. 
 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[]{avgraphacc.tikz}
+	\caption{\ac{AV} system accident rate using \acp{SNN} and \acp{ENN} across training epochs. Lower is better. \label{fig:avaccidents}}
+	\vspace{-4mm}
+\end{figure}
 %was measured by the amount of time the \ac{AV} was able to run before an accident occurred within the system and by the total number of accidents in all 1,000 runs.
 Then, the \ac{RE} mechanism is added to the controller, converting the
 controller \acp{SNN} to \acp{ENN} across all levels of training.
